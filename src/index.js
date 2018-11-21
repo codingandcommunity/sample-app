@@ -42,6 +42,7 @@ class Board extends React.Component {
             ],
             selected: null,
             moves: [],
+            turn: "white",
         };
     }
 
@@ -91,25 +92,25 @@ class Board extends React.Component {
     }
 
     selectSquare(x, y) {
-        this.setState({
-            selected: {
-                x: x,
-                y: y
-            }
-        });
         let moves = [];
         if (this.state.squares[y][x] !== null) {
-            for (var i = 0; i < 8; i++) {
-                for (var j = 0; j < 8; j++) {
-                    if (this.state.squares[y][x].validMove(x, y, j, i)) {
-                        if (this.state.squares[i][j] === null || this.state.squares[i][j].color !== this.state.squares[y][x].color) {
-                            moves.push({x: j, y: i});
+            if (this.state.squares[y][x].color === this.state.turn) {
+                for (var i = 0; i < 8; i++) {
+                    for (var j = 0; j < 8; j++) {
+                        if (this.state.squares[y][x].validMove(x, y, j, i)) {
+                            if (this.state.squares[i][j] === null || this.state.squares[i][j].color !== this.state.squares[y][x].color) {
+                                moves.push({x: j, y: i});
+                            }
                         }
                     }
                 }
             }
         } 
-        this.setState({moves});
+        const selected ={
+            x: x,
+            y: y
+        };
+        this.setState({selected, moves});
     }
 
     handleClick(x, y) {
@@ -117,8 +118,13 @@ class Board extends React.Component {
         if (this.isAMove(x, y)) {
             board[y][x] = board[this.state.selected.y][this.state.selected.x];
             board[this.state.selected.y][this.state.selected.x] = null;
-            this.setState({board});
-            this.selectSquare(x, y);
+            var turn = "white";
+            if (this.state.turn === "white") {
+                turn = "black";
+            }
+            this.setState({board, turn}, () => {
+                this.selectSquare(x, y);
+            });
         } else {
             this.selectSquare(x, y);
         }
