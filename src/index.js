@@ -10,19 +10,35 @@ function Square(props) {
     );
 }
 
+class Piece {
+    constructor(color, symbol) {
+        this.color = color;
+        this.symbol = symbol; 
+    }
+
+    validMove(x, y, _x, _y) {
+        if (_x === x-1 || _x === x+1) {
+            return y === _y;
+        } else if (_y === y-1 || _y === y+1) {
+            return x === _x;
+        }
+        return false;
+    }
+}
+
 class Board extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             squares: [
-                ['X', null, null, null, null, null, null, null],
+                [new Piece('white', 'X'), new Piece('white', 'Z'), null, null, null, null, null, null],
                 [null, null, null, null, null, null, null, null],
                 [null, null, null, null, null, null, null, null],
                 [null, null, null, null, null, null, null, null],
                 [null, null, null, null, null, null, null, null],
                 [null, null, null, null, null, null, null, null],
                 [null, null, null, null, null, null, null, null],
-                [null, null, null, null, null, null, null, null],
+                [new Piece('black', 'Y'), null, null, null, null, null, null, null],
             ],
             selected: null,
             moves: [],
@@ -60,9 +76,14 @@ class Board extends React.Component {
             }
         }
 
+        let value = null;
+        if (this.state.squares[y][x] !== null) {
+            value = this.state.squares[y][x].symbol;
+        }
+
         return ( 
             <Square 
-                value={this.state.squares[y][x]} 
+                value={value} 
                 style={style}
                 onClick={() => this.handleClick(x, y)}
             />
@@ -76,29 +97,19 @@ class Board extends React.Component {
                 y: y
             }
         });
+        let moves = [];
         if (this.state.squares[y][x] !== null) {
-            const moves = [
-                {
-                    x: x - 1,
-                    y: y,
-                },
-                {
-                    x: x + 1,
-                    y: y,
-                },
-                {
-                    x: x,
-                    y: y-1,
-                },
-                {
-                    x: x,
-                    y: y+1,
-                },
-            ];
-            this.setState({moves});
-        } else {
-            this.setState({moves: []});
-        }
+            for (var i = 0; i < 8; i++) {
+                for (var j = 0; j < 8; j++) {
+                    if (this.state.squares[y][x].validMove(x, y, j, i)) {
+                        if (this.state.squares[i][j] === null || this.state.squares[i][j].color !== this.state.squares[y][x].color) {
+                            moves.push({x: j, y: i});
+                        }
+                    }
+                }
+            }
+        } 
+        this.setState({moves});
     }
 
     handleClick(x, y) {
