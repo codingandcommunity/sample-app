@@ -26,19 +26,71 @@ class Piece {
     }
 }
 
+class Rook {
+    constructor(color) {
+        this.color = color;
+        if (this.color === "white") {
+            this.symbol = '\u2656';
+        } else {
+            this.symbol = '\u265C';
+        }
+    }
+
+    validMove(x, y, _x, _y, board) {
+        var i;
+        if (x === _x) {
+            if (y < _y) {
+                for (i = y+1; i < _y; i++) {
+                    if (board[i][x] !== null) {
+                        return false;
+                    }
+                } 
+            } else if (_y < y) {
+                for (i = y-1; i > _y; i--) {
+                    if (board[i][x] !== null) {
+                        return false;
+                    }
+                }
+            }
+            if (board[_y][_x] === null || board[_y][_x].color !== this.color) {
+                return true;
+            }
+        } else if (y === _y) {
+            if (x < _x) {
+                for (i = x+1; i < _x; i++) {
+                    if (board[y][i] !== null) {
+                        return false;
+                    }
+                } 
+            } else if (_x < x) {
+                for (i = x-1; i > _x; i--) {
+                    if (board[y][i] !== null) {
+                        return false;
+                    }
+                }
+            }
+            if (board[_y][_x] === null || board[_y][_x].color !== this.color) {
+                return true;
+            }
+        }
+        return false;
+
+    }
+}
+
 class Board extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             squares: [
-                [new Piece('white', 'X'), new Piece('white', 'Z'), null, null, null, null, null, null],
+                [new Rook('white'), new Piece('white', 'Z'), null, null, null, null, null, null],
                 [null, null, null, null, null, null, null, null],
                 [null, null, null, null, null, null, null, null],
                 [null, null, null, null, null, null, null, null],
                 [null, null, null, null, null, null, null, null],
                 [null, null, null, null, null, null, null, null],
                 [null, null, null, null, null, null, null, null],
-                [new Piece('black', 'Y'), null, null, null, null, null, null, null],
+                [new Piece('black', '\u265A'), null, null, null, null, null, null, null],
             ],
             selected: null,
             moves: [],
@@ -64,9 +116,9 @@ class Board extends React.Component {
     renderSquare(x, y) {
         let style = null;
         if ((x % 2 === 0 && y % 2 === 0) || (x % 2 === 1 && y % 2 === 1)) {
-            style = { background: 'blue' };
+            style = { background: 'white', color: 'black' };
         } else {
-            style = { background: 'yellow' };
+            style = { background: 'black', color: 'white' };
         }
         if (this.state.selected !== null) {
             if (this.state.selected.x ===x && this.state.selected.y === y) {
@@ -97,7 +149,7 @@ class Board extends React.Component {
             if (this.state.squares[y][x].color === this.state.turn) {
                 for (var i = 0; i < 8; i++) {
                     for (var j = 0; j < 8; j++) {
-                        if (this.state.squares[y][x].validMove(x, y, j, i)) {
+                        if (this.state.squares[y][x].validMove(x, y, j, i, this.state.squares)) {
                             if (this.state.squares[i][j] === null || this.state.squares[i][j].color !== this.state.squares[y][x].color) {
                                 moves.push({x: j, y: i});
                             }
